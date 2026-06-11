@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 from lxml import etree
 from datetime import datetime, timedelta, timezone
+import duckdb
 
 def fetch_observations(station_id, start_time, end_time):
     start_time = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -50,10 +51,23 @@ def parse_observations(xml_bytes, station_id):
             
     return parsed_observations
 
+def save_to_duckdb(observations):
+    con = duckdb.connect("data/weather.db")
+    con.sql("""
+    CREATE TABLE IF NOT EXISTS weather (
+        station_id      INTEGER,
+        time            TIMESTAMPTZ,
+        parameter_name  VARCHAR(50),
+        parameter_value FLOAT,
+        PRIMARY KEY (station_id, time, parameter_name)
+        )
+    """)
+    df = pd.DataFrame(observations)
+    con.sql("INSERT OR IGNORE INTO weather SELECT * FROM df")
 
 if __name__ == "__main__":
     end = datetime.now(timezone.utc)
     start = end - timedelta(hours=24)
     observations = fetch_observations(101118, start, end)
     parsed_observations = parse_observations(observations, 101118)
-    print(parsed_observations)
+    save_to_duckdb(parsed_observations)

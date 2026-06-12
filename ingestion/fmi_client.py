@@ -62,7 +62,7 @@ def save_to_duckdb(observations):
         PRIMARY KEY (station_id, time, parameter_name)
         )
     """)
-    df = pd.DataFrame(observations)
+    df = pd.DataFrame(observations)  # noqa: F841 used in SQL query below
     con.sql("INSERT OR IGNORE INTO weather SELECT * FROM df")
 
 if __name__ == "__main__":

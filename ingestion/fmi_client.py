@@ -4,6 +4,8 @@ from lxml import etree
 from datetime import datetime, timedelta, timezone
 import duckdb
 
+STATIONS = {"Tampere": 101118, "Helsinki": 100968, "Turku": 101065, "Oulu": 101786, "Rovaniemi": 101928}
+
 def fetch_observations(station_id, start_time, end_time):
     start_time = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
     end_time = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -68,6 +70,9 @@ def save_to_duckdb(observations):
 if __name__ == "__main__":
     end = datetime.now(timezone.utc)
     start = end - timedelta(hours=24)
-    observations = fetch_observations(101118, start, end)
-    parsed_observations = parse_observations(observations, 101118)
-    save_to_duckdb(parsed_observations)
+    for name, station_id in STATIONS.items():
+        print(name)
+        print(station_id)
+        observations = fetch_observations(station_id, start, end)
+        parsed_observations = parse_observations(observations, station_id)
+        save_to_duckdb(parsed_observations)

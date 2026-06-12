@@ -1,7 +1,6 @@
 import pandas as pd
 import requests
 from lxml import etree
-from datetime import datetime, timedelta, timezone
 import duckdb
 
 STATIONS = {"Tampere": 101118, "Helsinki": 100968, "Turku": 101065, "Oulu": 101786, "Rovaniemi": 101928}
@@ -66,13 +65,3 @@ def save_to_duckdb(observations):
     """)
     df = pd.DataFrame(observations)  # noqa: F841 used in SQL query below
     con.sql("INSERT OR IGNORE INTO weather SELECT * FROM df")
-
-if __name__ == "__main__":
-    end = datetime.now(timezone.utc)
-    start = end - timedelta(hours=24)
-    for name, station_id in STATIONS.items():
-        print(name)
-        print(station_id)
-        observations = fetch_observations(station_id, start, end)
-        parsed_observations = parse_observations(observations, station_id)
-        save_to_duckdb(parsed_observations)

@@ -1,0 +1,6 @@
+sources:
+  - name: raw
+    database: weather
+    schema: main
+    tables:
+      - name: weather

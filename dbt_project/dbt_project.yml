@@ -1,0 +1,13 @@
+name: weather_pipeline
+
+config-version: 2
+version: "1.0.0"
+
+profile: weather_pipeline
+
+model-paths: ["models"]
+
+models:
+  weather_pipeline:
+    staging:
+      +materialized: view

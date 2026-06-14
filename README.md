@@ -11,23 +11,40 @@ The pipeline fetches observations from five stations (Tampere, Helsinki, Turku, 
 - **Ingestion**: Python + Prefect
 - **Storage**: DuckDB (`data/weather.db`)
 - **Transformation**: dbt-core with dbt-duckdb adapter
+- **Dashboard**: Streamlit
+
+## Architecture
+
+The pipeline follows a layered structure loosely based on the medallion pattern:
+
+- **Bronze** — raw observations stored as-is from the FMI API (`raw.weather`). FMI returns data in EAV format (one row per parameter per timestamp), so the table reflects that structure without modification.
+- **Silver** — `stg_observations` pivots the EAV rows into typed wide columns (one row per station per hour).
+- **Gold** — `daily_summary` aggregates hourly readings into daily min/avg/max statistics per station.
+
+A full medallion implementation would store raw XML in bronze and push all parsing into dbt. At this scale and with a single source that would be over-engineering.
 
 ## Project Structure
 
 ```
+config.py                    # Shared config (stations, DB path)
 ingestion/
-  fmi_client.py        # FMI WFS API client, XML parser, DuckDB writer
+  fmi_client.py              # FMI WFS API client, XML parser, DuckDB writer
 prefect_flows/
-  daily_ingest.py      # Prefect flow that runs ingestion for all stations
+  daily_ingest.py            # Prefect flow that runs ingestion for all stations
 dbt_project/
   models/
     staging/
-      stg_observations.sql   # Pivots raw parameter rows into typed columns
+      stg_observations.sql   # Pivots raw EAV rows into typed columns
+      stg_observations.yml   # dbt tests: not_null, unique, accepted_range
+      sources.yml            # Source definition with not_null tests on raw data
     mart/
       daily_summary.sql      # Daily min/avg/max aggregates per station
-  dbt_project.yml
+  packages.yml               # dbt_utils dependency
+dashboard/
+  app.py                     # Streamlit dashboard with station selector and KPI metrics
+  data_loader.py             # DuckDB query helpers
 data/
-  weather.db           # DuckDB database (not committed)
+  weather.db                 # DuckDB database (not committed)
 ```
 
 ## Data Source
@@ -76,5 +93,18 @@ Run dbt transformations:
 
 ```bash
 cd dbt_project
+dbt deps
 dbt run
+```
+
+Run dbt tests:
+
+```bash
+dbt test
+```
+
+Run the dashboard:
+
+```bash
+streamlit run dashboard/app.py
 ```

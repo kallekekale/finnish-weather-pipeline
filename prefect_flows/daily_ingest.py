@@ -1,6 +1,7 @@
 from prefect import flow
 from datetime import datetime, timedelta, timezone
-from ingestion.fmi_client import fetch_observations, parse_observations, save_to_duckdb, STATIONS
+from ingestion.fmi_client import fetch_observations, parse_observations, save_to_duckdb
+from config import STATIONS
 
 @flow(log_prints=True)
 def run_ingestion():

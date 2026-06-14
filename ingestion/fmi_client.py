@@ -3,8 +3,6 @@ import requests
 from lxml import etree
 import duckdb
 
-STATIONS = {"Tampere": 101118, "Helsinki": 100968, "Turku": 101065, "Oulu": 101786, "Rovaniemi": 101928}
-
 def fetch_observations(station_id, start_time, end_time):
     start_time = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
     end_time = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")

@@ -4,3 +4,13 @@ sources:
     schema: main
     tables:
       - name: weather
+        columns:
+          - name: station_id
+            tests:
+              - not_null
+          - name: time
+            tests:
+              - not_null
+          - name: parameter_name
+            tests:
+              - not_null

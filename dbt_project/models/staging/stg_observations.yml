@@ -1,0 +1,17 @@
+models:
+  - name: stg_observations
+    tests:
+      - unique:
+          column_name: "station_id || '-' || CAST(time AS VARCHAR)"
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+      - name: time
+        tests:
+          - not_null
+      - name: temp_c
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -60
+              max_value: 60

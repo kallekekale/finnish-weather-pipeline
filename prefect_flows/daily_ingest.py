@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from prefect import flow
 from datetime import datetime, timedelta, timezone
 from ingestion.fmi_client import fetch_observations, parse_observations, save_to_duckdb

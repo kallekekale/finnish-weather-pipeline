@@ -219,5 +219,6 @@ __marimo__/
 
 data/
 dbt_packages/
+dbt_project/.user.yml
 .vscode/
 .DS_Store

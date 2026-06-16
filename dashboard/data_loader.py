@@ -8,7 +8,7 @@ from config import DB_PATH
 
 
 def _execute_query(query: str) -> pd.DataFrame:
-	connection = duckdb.connect(DB_PATH, read_only=True)
+	connection = duckdb.connect(DB_PATH)
 	try:
 		return connection.execute(query).fetchdf()
 	except duckdb.Error as exc:

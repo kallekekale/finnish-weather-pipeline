@@ -62,5 +62,6 @@ def save_to_duckdb(observations):
         PRIMARY KEY (station_id, time, parameter_name)
         )
     """)
+    con.sql("DELETE FROM weather WHERE time < NOW() - INTERVAL 6 MONTHS")
     df = pd.DataFrame(observations)  # noqa: F841 used in SQL query below
     con.sql("INSERT OR IGNORE INTO weather SELECT * FROM df")

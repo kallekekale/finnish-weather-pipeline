@@ -4,13 +4,14 @@ A data pipeline that ingests hourly weather observations from the Finnish Meteor
 
 ## Overview
 
-The pipeline fetches observations from five stations (Tampere, Helsinki, Turku, Oulu, and Rovaniemi) on a daily schedule. Raw data is stored in DuckDB and transformed through two dbt layers: a staging model that pivots the raw parameter rows into typed columns, and a mart model that aggregates hourly readings into daily min/avg/max statistics.
+The pipeline fetches observations from five stations (Tampere, Helsinki, Turku, Oulu, and Rovaniemi) on a daily schedule via GitHub Actions. Raw data is stored in MotherDuck and transformed through two dbt layers: a staging model that pivots the raw parameter rows into typed columns, and a mart model that aggregates hourly readings into daily min/avg/max statistics.
 
 ## Stack
 
 - **Ingestion**: Python + Prefect
-- **Storage**: DuckDB (`data/weather.db`)
+- **Storage**: MotherDuck (cloud DuckDB)
 - **Transformation**: dbt-core with dbt-duckdb adapter
+- **Orchestration**: GitHub Actions (daily cron)
 - **Dashboard**: Streamlit
 
 ## Architecture
@@ -28,7 +29,7 @@ A full medallion implementation would store raw XML in bronze and push all parsi
 ```
 config.py                    # Shared config (stations, DB path)
 ingestion/
-  fmi_client.py              # FMI WFS API client, XML parser, DuckDB writer
+  fmi_client.py              # FMI WFS API client, XML parser, MotherDuck writer
 prefect_flows/
   daily_ingest.py            # Prefect flow that runs ingestion for all stations
 dbt_project/
@@ -40,11 +41,13 @@ dbt_project/
     mart/
       daily_summary.sql      # Daily min/avg/max aggregates per station
   packages.yml               # dbt_utils dependency
+  profiles.yml               # dbt connection config (MotherDuck)
+.github/workflows/
+  ingest.yml                 # Daily ingestion + dbt run via GitHub Actions
+  check.yml                  # Lint and syntax check on push
 dashboard/
   app.py                     # Streamlit dashboard with station selector and KPI metrics
-  data_loader.py             # DuckDB query helpers
-data/
-  weather.db                 # DuckDB database (not committed)
+  data_loader.py             # MotherDuck query helpers
 ```
 
 ## Data Source
@@ -68,18 +71,18 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Configure a dbt profile named `weather_pipeline` pointing at the DuckDB file. Example `~/.dbt/profiles.yml`:
+Create a `.env` file with your MotherDuck token:
 
-```yaml
-weather_pipeline:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: /absolute/path/to/finnish-weather-pipeline/data/weather.db
+```bash
+cp .env.example .env
+# Add your token to .env
 ```
 
-Note: dbt requires an absolute path here. Replace the path above with the actual location on your machine.
+Set the token as an environment variable before running:
+
+```bash
+source .env
+```
 
 ## Running
 

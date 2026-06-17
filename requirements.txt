@@ -3,6 +3,7 @@ lxml
 duckdb
 pandas
 ruff
+prefect
 dbt-core
 dbt-duckdb
 streamlit

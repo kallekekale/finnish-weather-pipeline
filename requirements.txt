@@ -1,6 +1,6 @@
 requests
 lxml
-duckdb
+duckdb==1.5.3
 pandas
 ruff
 prefect

@@ -43,8 +43,8 @@ dbt_project/
   packages.yml               # dbt_utils dependency
   profiles.yml               # dbt connection config (MotherDuck)
 .github/workflows/
-  ingest.yml                 # Daily ingestion + dbt run via GitHub Actions
-  check.yml                  # Lint and syntax check on push
+  ingest.yml                 # Daily ingestion + dbt run + dbt test via GitHub Actions
+  check.yml                  # Lint (ruff) on push
 dashboard/
   app.py                     # Streamlit dashboard with station selector and KPI metrics
   data_loader.py             # MotherDuck query helpers

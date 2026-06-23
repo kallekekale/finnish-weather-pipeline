@@ -24,4 +24,4 @@ jobs:
         run: python prefect_flows/daily_ingest.py
 
       - name: Run dbt
-        run: cd dbt_project && dbt deps && dbt run
+        run: cd dbt_project && dbt deps && dbt run && dbt test

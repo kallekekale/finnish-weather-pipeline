@@ -20,7 +20,3 @@ def _execute_query(query: str) -> pd.DataFrame:
 @st.cache_data(ttl=3600)
 def load_daily_summary() -> pd.DataFrame:
 	return _execute_query("SELECT * FROM daily_summary")
-
-@st.cache_data(ttl=3600)
-def load_stg_observations() -> pd.DataFrame:
-	return _execute_query("SELECT * FROM stg_observations")

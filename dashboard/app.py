@@ -5,13 +5,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from data_loader import load_daily_summary, load_stg_observations
+from data_loader import load_daily_summary
 from config import STATIONS
 
 daily_summary = load_daily_summary()
-stg_observations = load_stg_observations()
 
 st.title("Weather stats")
 
@@ -34,23 +32,21 @@ col2.metric("Humidity", f"{latest['avg_humidity_pct']:.1f} %", delta=delta("avg_
 col3.metric("Wind speed", f"{latest['avg_wind_speed_ms']:.1f} m/s", delta=delta("avg_wind_speed_ms"))
 col4.metric("Air pressure", f"{latest['avg_pressure_hpa']:.1f} hPa", delta=delta("avg_pressure_hpa"))
 
-st.subheader("Temperature")
-obs = stg_observations[stg_observations["station_id"] == station_id].sort_values("time")
-
 days = st.radio("Range", ["7 days", "30 days", "All"], horizontal=True)
 if days != "All":
-    cutoff = obs["time"].max() - pd.Timedelta(days=int(days.split()[0]))
-    obs = obs[obs["time"] >= cutoff]
+    cutoff = filtered["date"].max() - pd.Timedelta(days=int(days.split()[0]))
+    chart_data = filtered[filtered["date"] >= cutoff].sort_values("date")
+else:
+    chart_data = filtered.sort_values("date")
 
-fig = px.line(obs, x="time", y="temp_c", labels={"time": "", "temp_c": "°C"})
-fig.update_yaxes(rangemode="normal")
+st.subheader("Temperature")
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=chart_data["date"], y=chart_data["min_temp_c"], mode="lines", line={"width": 0}, showlegend=False))
+fig.add_trace(go.Scatter(x=chart_data["date"], y=chart_data["max_temp_c"], mode="lines", line={"width": 0}, fill="tonexty", fillcolor="rgba(239,85,59,0.15)", name="Min–Max range"))
+fig.add_trace(go.Scatter(x=chart_data["date"], y=chart_data["avg_temp_c"], mode="lines", name="Daily avg", line={"color": "#ef553b"}))
+fig.update_layout(yaxis_title="°C", legend={"orientation": "h", "y": -0.2})
 st.plotly_chart(fig, use_container_width=True)
 
-st.subheader("Temperature & precipitation")
-fig2 = make_subplots(specs=[[{"secondary_y": True}]])
-fig2.add_trace(go.Scatter(x=obs["time"], y=obs["temp_c"], name="Temperature (°C)", line={"color": "#ef553b"}), secondary_y=False)
-fig2.add_trace(go.Bar(x=obs["time"], y=obs["precipitation_mm"], name="Precipitation (mm)", marker_color="#636efa", opacity=0.5), secondary_y=True)
-fig2.update_yaxes(title_text="°C", secondary_y=False, rangemode="normal")
-fig2.update_yaxes(title_text="mm", secondary_y=True, rangemode="tozero")
-fig2.update_layout(legend={"orientation": "h", "y": -0.2})
+st.subheader("Precipitation")
+fig2 = px.bar(chart_data, x="date", y="total_precipitation_mm", labels={"date": "", "total_precipitation_mm": "mm"})
 st.plotly_chart(fig2, use_container_width=True)

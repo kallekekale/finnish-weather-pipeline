@@ -4,6 +4,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import duckdb
 import pandas as pd
+import streamlit as st
 from config import DB_PATH
 
 
@@ -16,8 +17,10 @@ def _execute_query(query: str) -> pd.DataFrame:
 	finally:
 		connection.close()
 
+@st.cache_data(ttl=3600)
 def load_daily_summary() -> pd.DataFrame:
 	return _execute_query("SELECT * FROM daily_summary")
 
+@st.cache_data(ttl=3600)
 def load_stg_observations() -> pd.DataFrame:
 	return _execute_query("SELECT * FROM stg_observations")

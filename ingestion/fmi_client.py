@@ -52,16 +52,16 @@ def parse_observations(xml_bytes, station_id):
     return parsed_observations
 
 def save_to_duckdb(observations):
-    con = duckdb.connect(DB_PATH)
-    con.sql("""
-    CREATE TABLE IF NOT EXISTS weather (
-        station_id      INTEGER,
-        time            TIMESTAMPTZ,
-        parameter_name  VARCHAR(50),
-        parameter_value FLOAT,
-        PRIMARY KEY (station_id, time, parameter_name)
-        )
-    """)
-    con.sql("DELETE FROM weather WHERE time < NOW() - INTERVAL 6 MONTHS")
-    df = pd.DataFrame(observations)  # noqa: F841 used in SQL query below
-    con.sql("INSERT OR IGNORE INTO weather SELECT * FROM df")
+    with duckdb.connect(DB_PATH) as con:
+        con.sql("""
+        CREATE TABLE IF NOT EXISTS weather (
+            station_id      INTEGER,
+            time            TIMESTAMPTZ,
+            parameter_name  VARCHAR(50),
+            parameter_value FLOAT,
+            PRIMARY KEY (station_id, time, parameter_name)
+            )
+        """)
+        con.sql("DELETE FROM weather WHERE time < NOW() - INTERVAL 6 MONTHS")
+        df = pd.DataFrame(observations)  # noqa: F841 used in SQL query below
+        con.sql("INSERT OR IGNORE INTO weather SELECT * FROM df")

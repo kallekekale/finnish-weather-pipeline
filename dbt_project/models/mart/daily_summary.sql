@@ -11,9 +11,7 @@ SELECT
     ROUND(MIN(wind_speed_ms), 1) AS min_wind_speed_ms,
     ROUND(MAX(wind_speed_ms), 1) AS max_wind_speed_ms,
     ROUND(AVG(wind_direction_deg), 1) AS avg_wind_direction_deg,
-    ROUND(AVG(precipitation_mm), 1) AS avg_precipitation_mm,
-    ROUND(MIN(precipitation_mm), 1) AS min_precipitation_mm,
-    ROUND(MAX(precipitation_mm), 1) AS max_precipitation_mm,
+    ROUND(SUM(precipitation_mm), 1) AS total_precipitation_mm,
     ROUND(AVG(pressure_hpa), 1) AS avg_pressure_hpa,
     ROUND(MIN(pressure_hpa), 1) AS min_pressure_hpa,
     ROUND(MAX(pressure_hpa), 1) AS max_pressure_hpa
